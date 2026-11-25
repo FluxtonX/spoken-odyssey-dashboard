@@ -1,0 +1,25 @@
+import MetricCard from "./MetricCard.jsx";
+import GrowthChart from "./GrowthChart.jsx";
+import PostTypeBreakdown from "../shared/PostTypeBreakdown.jsx";
+import Dropdown from "../shared/Dropdown.jsx";
+import { formatNumber } from "../../lib/formatters.js";
+
+export default function OverviewDashboard({ view, overview, admin, period, setPeriod, loadOverview, setView, error }) {
+  const userGrowth = overview?.users?.inPeriod ?? 0;
+  const postTypes = { image: 0, voice: 0, video: 0, text: 0, other: 0 };
+  for (const item of overview?.posts?.byType || []) {
+    const key = item.type?.toLowerCase().includes("photo") || item.type?.toLowerCase().includes("image") ? "image" : item.type?.toLowerCase().includes("voice") || item.type?.toLowerCase().includes("audio") ? "voice" : item.type?.toLowerCase().includes("video") ? "video" : item.type?.toLowerCase().includes("text") || item.type?.toLowerCase().includes("milestone") ? "text" : "other";
+    postTypes[key] += item.count;
+  }
+
+  return (
+    <>
+      {view === "overview" && <>
+          <div className="page-heading"><div><p className="eyebrow">YOUR PLATFORM AT A GLANCE</p><h1>Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 18 ? "afternoon" : "evening"}, {admin.displayName?.split(" ")[0] || "Admin"}<span className="heading-wave">✦</span></h1><p>Here’s what’s happening across Spoken Odyssey.</p></div><Dropdown label="Reporting period" icon="◷" value={period} onChange={(value) => { setPeriod(value); loadOverview(value).catch(() => {}); }} options={[{ value: "30d", label: "Last 30 days", description: "Daily user and family growth" }, { value: "12m", label: "Last 12 months", description: "Monthly user and family growth" }]}/></div>
+          {!overview && !error ? <div className="panel table-message">Loading dashboard data…</div> : <><div className="metric-grid"><MetricCard label="Total users" value={overview?.users?.total} note={`${formatNumber(overview?.users?.thisMonth)} joined this month`} icon="◎" tone="purple"/><MetricCard label="Active users" value={overview?.users?.activeLast30Days} note="Active in the last 30 days" icon="↗" tone="green"/><MetricCard label="Family circles" value={overview?.families?.total} note={`${formatNumber(overview?.families?.activeMemberships)} active members`} icon="⌂" tone="orange"/><MetricCard label="Total posts" value={overview?.posts?.total} note={`${formatNumber(overview?.families?.familyPosts)} shared with families`} icon="▤" tone="blue"/></div>
+          <div className="dashboard-grid"><section className="panel growth-panel"><div className="panel-heading"><div><p className="eyebrow">AUDIENCE</p><h2>User growth</h2></div><span className="chart-legend"><i /> New users</span></div><div className="growth-stat"><strong>{formatNumber(userGrowth)}</strong><span>new accounts in the selected period</span></div><GrowthChart rows={overview?.monthly || []} period={period}/></section><section className="panel activity-panel"><div className="panel-heading"><div><p className="eyebrow">CONTENT</p><h2>Post breakdown</h2></div><span className="subtle-icon">◉</span></div><p className="activity-total">{formatNumber(overview?.posts?.total)}<span>total posts</span></p><PostTypeBreakdown types={postTypes}/><div className="activity-divider"/><div className="activity-foot"><span>Media assets saved</span><strong>{formatNumber(overview?.mediaAssets?.total)}</strong></div><div className="activity-foot"><span>Family shared posts</span><strong>{formatNumber(overview?.families?.familyPosts)}</strong></div></section></div>
+          <div className="lower-grid"><section className="panel lower-panel"><div className="panel-heading"><div><p className="eyebrow">COMMUNITY</p><h2>Family growth</h2></div><button className="link-button" onClick={() => setView("families")}>View families ↗</button></div><div className="family-growth-list">{(overview?.monthly || []).slice(-5).map((row) => { const date = new Date(`${row.bucket}${period === "12m" ? "-01" : ""}T00:00:00`); const label = period === "12m" ? date.toLocaleDateString(undefined, { month: "long", year: "numeric" }) : date.toLocaleDateString(undefined, { month: "short", day: "numeric" }); return <div key={row.bucket}><span>{label}</span><div className="family-track"><i style={{ width: `${Math.max(3, (row.families / Math.max(1, ...overview.monthly.map((item) => item.families))) * 100)}%` }}/></div><strong>{row.families}</strong></div>; })}</div></section><section className="panel lower-panel insight-panel"><div className="insight-symbol">✳</div><div><p className="eyebrow">PLATFORM SNAPSHOT</p><h2>Stories connect generations.</h2><p>{formatNumber(overview?.families?.activeMemberships)} people are preserving memories together in {formatNumber(overview?.families?.total)} family spaces.</p><button className="link-button" onClick={() => setView("users")}>Explore your community ↗</button></div></section></div></>}
+        </>}
+    </>
+  );
+}
