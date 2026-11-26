@@ -17,6 +17,7 @@ export function useAdminDashboard() {
   const [loadingData, setLoadingData] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [refreshSignal, setRefreshSignal] = useState(0);
 
   const loadOverview = useCallback(async (selectedPeriod = "12m") => {
     try {
@@ -56,7 +57,7 @@ export function useAdminDashboard() {
     } finally { setLoadingSession(false); }
   }, [loadOverview]);
 
-  useEffect(() => { loadSession(); }, [loadSession]);
+  useEffect(() => { Promise.resolve().then(loadSession); }, [loadSession]);
   useEffect(() => {
     if (!admin || (view !== "users" && view !== "families")) return undefined;
     const timer = setTimeout(() => loadDirectory(view, search, directoryPage, sort, familyFilter), 220);
@@ -74,6 +75,8 @@ export function useAdminDashboard() {
     setRefreshing(true);
     if (view === "overview") {
       try { await loadOverview(period); } catch {}
+    } else if (view === "content" || view === "activity") {
+      setRefreshSignal((value) => value + 1);
     } else {
       await loadDirectory(view, search, directoryPage, sort, familyFilter);
     }
@@ -90,6 +93,6 @@ export function useAdminDashboard() {
     directoryPage, setDirectoryPage, directoryPages, search, setSearch,
     sort, setSort, familyFilter, setFamilyFilter, detailsTarget,
     setDetailsTarget, loadingSession, loadingData, refreshing, error,
-    setError, loadOverview, loadDirectory, afterLogin, refreshCurrentView, logout,
+    setError, loadOverview, loadDirectory, afterLogin, refreshCurrentView, refreshSignal, logout,
   };
 }
