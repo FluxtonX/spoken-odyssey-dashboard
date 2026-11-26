@@ -12,7 +12,11 @@ async function proxy(request, context) {
   try {
     const upstream = await fetch(target, {
       method: request.method,
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(request.headers.get("content-type") ? { "Content-Type": request.headers.get("content-type") } : {}),
+      },
+      ...(request.method === "GET" || request.method === "HEAD" ? {} : { body: await request.text() }),
       cache: "no-store",
     });
     const payload = await upstream.json();
@@ -23,3 +27,7 @@ async function proxy(request, context) {
 }
 
 export const GET = proxy;
+export const POST = proxy;
+export const PATCH = proxy;
+export const PUT = proxy;
+export const DELETE = proxy;

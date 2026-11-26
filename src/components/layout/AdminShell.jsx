@@ -4,7 +4,7 @@ import DetailsModal from "../directory/DetailsModal.jsx";
 
 export default function AdminShell({
   admin, view, onNavigate, onRefresh, refreshing, onLogout, error,
-  onDismissError, detailsTarget, onCloseDetails, children,
+  onDismissError, detailsTarget, onCloseDetails, children, onDataChanged, refreshSignal,
 }) {
   return (
     <>
@@ -18,6 +18,9 @@ export default function AdminShell({
           <nav className="side-nav">
             {[["overview", "\u25eb", "Overview"], ["users", "\u25ce", "Users"], ["families", "\u2302", "Families"]].map(([key, icon, label]) => <button key={key} className={view === key ? "nav-item selected" : "nav-item"} onClick={() => onNavigate(key)}><span className="nav-icon">{icon}</span>{label}{view === key && <i />}</button>)}
           </nav>
+          <nav className="side-nav" aria-label="Management">
+            {["content", "activity"].map((key) => <button key={key} className={view === key ? "nav-item selected" : "nav-item"} onClick={() => onNavigate(key)}><span className="nav-icon">{key === "content" ? "▤" : "↻"}</span>{key === "content" ? "Content" : "Admin activity"}{view === key && <i />}</button>)}
+          </nav>
           <div className="sidebar-bottom">
             <div className="secure-note"><span>✳</span><div><strong>Private workspace</strong><small>Admin access only</small></div></div>
             <div className="sidebar-account">
@@ -28,7 +31,7 @@ export default function AdminShell({
         </aside>
         <main className="main-area">
           <header className="topbar">
-            <div className="breadcrumbs">Workspace <span>/</span> <strong>{view === "overview" ? "Overview" : view === "users" ? "Users" : "Families"}</strong></div>
+            <div className="breadcrumbs">Workspace <span>/</span> <strong>{{ overview: "Overview", users: "Users", families: "Families", content: "Content", activity: "Admin activity" }[view] || "Overview"}</strong></div>
             <div className="topbar-right"><button className="refresh-button" onClick={onRefresh} disabled={refreshing}><span className={refreshing ? "refresh-symbol spinning" : "refresh-symbol"}>↻</span>{refreshing ? "Refreshing" : "Refresh"}</button><span className="status-pill"><i /> Live data</span><span className="top-date">{new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</span><AdminProfileMenu admin={admin} onLogout={onLogout}/></div>
           </header>
           <div className="content-area">
@@ -38,7 +41,7 @@ export default function AdminShell({
           </div>
         </main>
       </div>
-      {detailsTarget && <DetailsModal target={detailsTarget} onClose={onCloseDetails}/>}
+      {detailsTarget && <DetailsModal target={detailsTarget} onClose={onCloseDetails} onDataChanged={onDataChanged} refreshSignal={refreshSignal}/>}
     </>
   );
 }
