@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { prettyType } from "../../lib/formatters.js";
 import { readJson } from "../../services/adminApi.js";
+import Dropdown from "../shared/Dropdown.jsx";
 
 const actionLabel = (action) => prettyType(String(action || "").replace(/^ADMIN_/, "").toLowerCase());
 const activityOptions = [
-  ["all", "All actions"],
-  ["user_restriction", "Account access changes"],
-  ["content_removed", "Content removed"],
-  ["content_restored", "Content restored"],
-  ["content_viewed", "Public content reviewed"],
-  ["family_invitation", "Family invitations revoked"],
+  { value: "all", label: "All actions", description: "Include every audited action" },
+  { value: "user_restriction", label: "Account access changes", description: "Restrictions and suspensions" },
+  { value: "content_removed", label: "Content removed", description: "Public posts removed by admins" },
+  { value: "content_restored", label: "Content restored", description: "Removed posts restored by admins" },
+  { value: "content_viewed", label: "Public content reviewed", description: "Public posts opened for review" },
+  { value: "family_invitation", label: "Family invitations revoked", description: "Family invitations revoked by admins" },
 ];
 
 function initialFilters() {
@@ -86,7 +87,7 @@ export default function AdminActivity({ refreshSignal = 0 }) {
       <div className="panel-heading directory-heading activity-filter-heading">
         <div><p className="eyebrow">AUDIT HISTORY</p><h2>Recent actions</h2><p className="panel-subtitle">Records include the administrator, reason, timestamp, and request IP.</p></div>
         <div className="activity-filters">
-          <label><span>Action</span><select value={filters.action} onChange={(event) => updateFilters({ action: event.target.value })}>{activityOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <div className="activity-filter"><span>Action</span><Dropdown label="Filter by action" icon="☷" value={filters.action} onChange={(value) => updateFilters({ action: value })} options={activityOptions} /></div>
           <label><span>From</span><input type="date" value={filters.from} onChange={(event) => updateFilters({ from: event.target.value })} /></label>
           <label><span>To</span><input type="date" value={filters.to} onChange={(event) => updateFilters({ to: event.target.value })} /></label>
           <label className="activity-search"><span>Search admin, user, post, or reason</span><input type="search" value={filters.search} onChange={(event) => updateFilters({ search: event.target.value })} placeholder="Search audit history" /></label>
