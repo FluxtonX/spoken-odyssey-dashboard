@@ -5,6 +5,7 @@ import DetailsModal from "../directory/DetailsModal.jsx";
 export default function AdminShell({
   admin, view, onNavigate, onRefresh, refreshing, onLogout, error,
   onDismissError, detailsTarget, onCloseDetails, children, onDataChanged, refreshSignal,
+  serviceStatus = "checking", lastUpdatedAt,
 }) {
   return (
     <>
@@ -32,7 +33,7 @@ export default function AdminShell({
         <main className="main-area">
           <header className="topbar">
             <div className="breadcrumbs">Workspace <span>/</span> <strong>{{ overview: "Overview", users: "Users", families: "Families", content: "Content", activity: "Admin activity" }[view] || "Overview"}</strong></div>
-            <div className="topbar-right"><button className="refresh-button" onClick={onRefresh} disabled={refreshing}><span className={refreshing ? "refresh-symbol spinning" : "refresh-symbol"}>↻</span>{refreshing ? "Refreshing" : "Refresh"}</button><span className="status-pill"><i /> Live data</span><span className="top-date">{new Date().toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" })}</span><AdminProfileMenu admin={admin} onLogout={onLogout}/></div>
+            <div className="topbar-right"><button className="refresh-button" onClick={onRefresh} disabled={refreshing}><span className={refreshing ? "refresh-symbol spinning" : "refresh-symbol"}>↻</span>{refreshing ? "Refreshing" : "Refresh"}</button><span className={`status-pill status-pill-${serviceStatus}`} title={lastUpdatedAt ? `Last successful admin API response: ${new Date(lastUpdatedAt).toLocaleString()}` : "Checking admin API"}><i />{serviceStatus === "connected" ? "API connected" : serviceStatus === "error" ? "API issue" : "Checking"}</span><span className="top-date">{lastUpdatedAt ? `Updated ${new Date(lastUpdatedAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}` : "No data yet"}</span><AdminProfileMenu admin={admin} onLogout={onLogout}/></div>
           </header>
           <div className="content-area">
             {error && <div className="notice-error">{error}<button onClick={onDismissError}>×</button></div>}
