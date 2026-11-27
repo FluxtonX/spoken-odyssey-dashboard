@@ -9,12 +9,16 @@ const restrictionNames = {
   PERMANENTLY_SUSPENDED: "Suspended",
 };
 
-export default function DirectoryTable({ view, rows, onSearch, search, loading, page, totalPages, onPage, sort, onSort, familyFilter, onFamilyFilter, onOpenDetails }) {
+export default function DirectoryTable({ view, rows, onSearch, search, loading, page, totalPages, onPage, sort, onSort, familyFilter, onFamilyFilter, userActivityFilter, onUserActivityFilter, onOpenDetails }) {
   const userView = view === "users";
   const familyOptions = [
     { value: "all", label: "All users", description: "Show every account" },
     { value: "joined", label: "In a family", description: "Has an active family membership" },
     { value: "none", label: "No family", description: "No active family membership" },
+  ];
+  const activityOptions = [
+    { value: "all", label: "All activity", description: "Include every account" },
+    { value: "active30", label: "Active in 30 days", description: "Signed in or active within the last 30 days" },
   ];
   const sortOptions = userView
     ? [{ value: "recent", label: "Newest first", description: "Recently registered accounts" }, { value: "oldest", label: "Oldest first", description: "Earliest registered accounts" }, { value: "name", label: "Name A–Z", description: "Alphabetical by display name" }, { value: "active", label: "Recently active", description: "Latest account activity" }]
@@ -22,7 +26,7 @@ export default function DirectoryTable({ view, rows, onSearch, search, loading, 
   return <section className="panel table-panel">
     <div className="panel-heading directory-heading">
       <div><p className="eyebrow">DIRECTORY</p><h2>{userView ? "Users" : "Family circles"}</h2><p className="panel-subtitle">{userView ? "Account activity, access status, family membership and post mix." : "Family membership and shared post activity."}</p></div>
-      <div className="directory-tools"><div className="search-box"><span>⌕</span><input value={search} onChange={(event) => onSearch(event.target.value)} placeholder={userView ? "Search users" : "Search families"} /></div>{userView && <Dropdown label="Filter by family" icon="◉" value={familyFilter} onChange={onFamilyFilter} options={familyOptions} />}<Dropdown label="Sort results" icon="⇅" value={sort} onChange={onSort} options={sortOptions} /></div>
+      <div className="directory-tools"><div className="search-box"><span>⌕</span><input value={search} onChange={(event) => onSearch(event.target.value)} placeholder={userView ? "Search users" : "Search families"} /></div>{userView && <Dropdown label="Filter by activity" icon="◷" value={userActivityFilter} onChange={onUserActivityFilter} options={activityOptions} />}{userView && <Dropdown label="Filter by family" icon="◉" value={familyFilter} onChange={onFamilyFilter} options={familyOptions} />}<Dropdown label="Sort results" icon="⇅" value={sort} onChange={onSort} options={sortOptions} /></div>
     </div>
     {loading ? <div className="table-message">Loading records…</div> : rows.length === 0 ? <div className="table-message">No matching records.</div> : <div className="table-scroll"><table>
       <thead><tr>{userView ? <><th>USER</th><th>ACCESS</th><th>JOINED</th><th>LAST ACTIVE</th><th>FAMILIES</th><th>POSTS</th><th>POST MIX</th></> : <><th>FAMILY</th><th>CREATED</th><th>CREATOR</th><th>MEMBERS</th><th>SHARED POSTS</th><th>POST MIX</th></>}</tr></thead>
