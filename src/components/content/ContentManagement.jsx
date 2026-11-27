@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { dateLabel, formatNumber, prettyType } from "../../lib/formatters.js";
 import { readJson } from "../../services/adminApi.js";
+import Dropdown from "../shared/Dropdown.jsx";
+
+const typeOptions = [
+  { value: "all", label: "All types", description: "Show every public post type" },
+  ...["Text", "Image", "Photo", "Voice", "Audio", "Video"].map((value) => ({ value, label: value, description: `Show ${value.toLowerCase()} posts` })),
+];
+const statusOptions = [
+  { value: "all", label: "All statuses", description: "Show posts in every status" },
+  { value: "published", label: "Published", description: "Currently published posts" },
+  { value: "draft", label: "Draft", description: "Unpublished drafts" },
+  { value: "archived", label: "User archived", description: "Archived by the post owner" },
+  { value: "removed", label: "Admin removed", description: "Removed by an administrator" },
+];
 import ContentDetailsModal from "./ContentDetailsModal.jsx";
 
 export default function ContentManagement({ refreshSignal = 0 }) {
@@ -47,8 +60,8 @@ export default function ContentManagement({ refreshSignal = 0 }) {
         <div><p className="eyebrow">PUBLIC POST LIBRARY</p><h2>Posts</h2><p className="panel-subtitle">Search public posts by title or owner, then open one for its text, transcripts, and media preview.</p></div>
         <div className="directory-tools">
           <div className="search-box"><span>⌕</span><input value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} placeholder="Search title or owner" /></div>
-          <select aria-label="Filter by type" value={type} onChange={(event) => { setType(event.target.value); setPage(1); }}><option value="all">All types</option>{["Text", "Image", "Photo", "Voice", "Audio", "Video"].map((value) => <option key={value} value={value}>{value}</option>)}</select>
-          <select aria-label="Filter by status" value={status} onChange={(event) => { setStatus(event.target.value); setPage(1); }}><option value="all">All statuses</option><option value="published">Published</option><option value="draft">Draft</option><option value="archived">User archived</option><option value="removed">Admin removed</option></select>
+          <Dropdown label="Filter by type" icon="▤" value={type} onChange={(value) => { setType(value); setPage(1); }} options={typeOptions} />
+          <Dropdown label="Filter by status" icon="◷" value={status} onChange={(value) => { setStatus(value); setPage(1); }} options={statusOptions} />
         </div>
       </div>
       {loading ? <div className="table-message">Loading posts…</div> : rows.length === 0 ? <div className="table-message">No posts match these filters.</div> : <div className="table-scroll"><table><thead><tr><th>POST</th><th>TYPE</th><th>STATUS</th><th>PRIVACY</th><th>OWNER</th><th>CREATED</th><th>MEDIA</th><th>REVIEW</th></tr></thead><tbody>{rows.map((row) => <tr key={row.id}>
